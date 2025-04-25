@@ -7,7 +7,7 @@
   <link rel="icon" href="https://static-00.iconduck.com/assets.00/artist-palette-emoji-2048x1860-ns605395.png" type="image/png" />
   <style>
     html, body { margin: 0; padding: 0; overflow: hidden; height: 100vh; }
-    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #41493b; display: flex; align-items: center; justify-content: center; position: relative; }
+    body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #41493b; display: flex; align-items: center; justify-content: center; flex-direction: column; }
     #menu, #card { display: none; }
     #menu.active {
       display: grid;
@@ -20,12 +20,12 @@
     .menu-btn:hover { background: #fb8c00; }
     .custom-btn { grid-column: span 2; }
     #card.active { display: flex; flex-direction: column; align-items: center; }
-    .card { background: #a5ae9d; width: 400px; height: 320px; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; }
+    .card { background: #a5ae9d; width: 400px; height: 320px; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); position: relative; display: flex; flex-direction: column; align-items: center; }
     .back-btn { position: fixed; top: 10px; left: 10px; background: #ff5555; color: #fff; border: none; padding: 10px 15px; font-size: 16px; border-radius: 8px; cursor: pointer; display: none; }
     .back-btn.show { display: block; }
     #score { position: fixed; top: 10px; right: 10px; font-size: 40px; color: #fff; z-index: 100; }
     h1 { margin: 0; font-size: 24px; color: white; }
-    button.main { background-color: #00aaff; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 18px; cursor: pointer; margin: 15px 0 10px; }
+    button.main { background-color: #00aaff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 15px 0; } /* تقليل حجم الزر */
     button.main:hover { background-color: #008ecc; }
     #idea { font-size: 18px; font-weight: bold; color: white; max-height: 100px; overflow-y: auto; width: 100%; white-space: pre-wrap; text-align: center; }
     #timer { font-size: 20px; color: #ff5555; margin-top: 10px; }
@@ -39,6 +39,7 @@
     .add-idea input { width: 200px; padding: 8px 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.5); font-size: 16px; outline: none; }
     .add-idea button { background-color: #90be6d; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 16px; cursor: pointer; }
     footer { position: fixed; bottom: 5px; width: 100%; text-align: center; font-size: 14px; color: #ccc; }
+    #startDrawingBtn { margin-top: 10px; width: 75%; max-width: 300px; } /* ضبط عرض الزر ليكون أقل عرض */
   </style>
 </head>
 <body>
@@ -67,6 +68,10 @@
       <button id="failBtn">فشلت +0</button>
     </div>
   </div>
+  
+  <!-- زر ابدأ الرسم موضوع تحت المربع بشكل مركزي -->
+  <button class="main" id="startDrawingBtn" style="display: none;" onclick="openDrawingPage()">ابدأ الرسم</button>
+
   <div class="add-idea">
     <input id="newIdea" placeholder="اكتب فكرتك هنا…" />
     <button onclick="addIdea()">إضافة فكرة</button>
@@ -102,26 +107,26 @@ const builtInIdeas = [
   "ارسم ساندويتش فيه مدينة - ⏱️ 5 دقائق",
   "ارسم طفل يطير بواسطة بالونات - ⏱️ 5 دقائق",
   "ارسم ظل يخالف شكل صاحبه - ⏱️ 10 دقائق",
-  "ارسم نافذة تطل على عالم خيالي - ⏱️ 15 دقائق",
+  "ارسم نافذة تطل على عالم خيالي - ⏱️ 15 دقيقة",
   "ارسم شخصية مرسومة بخط واحد فقط - ⏱️ 5 دقائق",
   "ارسم وردة تنمو من كتاب - ⏱️ 5 دقائق",
   "ارسم عالم داخل قطرة ماء - ⏱️ 10 دقائق",
-  "ارسم قطة تعزف على آلة موسيقية - ⏱️ 15 دقائق",
+  "ارسم قطة تعزف على آلة موسيقية - ⏱️ 15 دقيقة",
   "ارسم كرسي على شكل مخلوق - ⏱️ 10 دقائق",
   "ارسم طريق ينتهي في الفضاء - ⏱️ 15 دقيقة",
   "ارسم كائن شفاف - ⏱️ 10 دقائق",
   "ارسم طاولة فطور لكن العناصر تتحرك - ⏱️ 30 دقيقة",
-  "ارسم عالم داخل مصباح - ⏱️ 30 دقائق",
+  "ارسم عالم داخل مصباح - ⏱️ 30 دقيقة",
   "ارسم الساعة وهي تذوب - ⏱️ 15 دقيقة",
   "ارسم مفتاح قديم – ⏱️ 5 دقائق",
   "ارسم قلادة – ⏱️ 5 دقائق",
   "ارسم ريشة طائر – ⏱️ 5 دقائق",
   "ارسم وردة ذابلة – ⏱️ 5 دقائق",
   "ارسم قنديل بحر – ⏱️ 10 دقائق",
-  "ارسم لوحة إعلانات في مدينة – ⏱️ 15 دقائق",
+  "ارسم لوحة إعلانات في مدينة – ⏱️ 15 دقيقة",
   "ارسم خريطة كنز – ⏱️ 10 دقائق",
   "ارسم فتاة تطير فوق مدينة – ⏱️ 15 دقيقة",
-  "ارسم بالونات تطير فوق بحر – ⏱️ 10 دقيقة",
+  "ارسم بالونات تطير فوق بحر – ⏱️ 10 دقائق",
   "ارسم عين تنعكس فيها شجرة – ⏱️ 15 دقيقة",
   "ارسم وجه مغطى بأوراق الشجر – ⏱️ 15 دقيقة",
   "ارسم درج يصل إلى السحاب – ⏱️ 15 دقيقة",
@@ -147,7 +152,7 @@ const builtInIdeas = [
   "ارسم حاسبة فيها قطة – ⏱️ 5 دقائق",
   "ارسم قلب فيه مدينة – ⏱️ 30 دقيقة",
   "ارسم كوب قهوة على شكل جبل – ⏱️ 15 دقيقة",
-  "ارسم نص وجه إنسان ونص وجه روبوت - ⏱️ 15 دقائق",
+  "ارسم نص وجه إنسان ونص وجه روبوت - ⏱️ 15 دقيقة",
   "ارسم ديناصور يركب دراجة - ⏱️ 15 دقيقة",
   "ارسم فضاء بدون استخدام لون أسود - ⏱️ 10 دقائق",
   "ارسم طفل يركب على سحابة - ⏱️ 15 دقيقة",
@@ -160,11 +165,11 @@ const builtInIdeas = [
   "ارسم حيوان بعين واحدة كبيرة جدًا - ⏱️ 5 دقائق",
   "ارسم بحر مقلوب - ⏱️ 10 دقائق",
   "ارسم أسد نائم وسط زهور - ⏱️ 30 دقيقة",
-  "ارسم حقيبة مليئة بالكواكب - ⏱️ 30 دقائق",
+  "ارسم حقيبة مليئة بالكواكب - ⏱️ 30 دقيقة",
   "ارسم غيمة على هيئة قطة - ⏱️ 5 دقائق",
   "ارسم بيت من الورق - ⏱️ 5 دقائق",
   "ارسم زهرة داخل مصباح - ⏱️ 10 دقائق",
-  "ارسم إنسان نصفه شتاء ونصفه صيف - ⏱️ 30 دقائق",
+  "ارسم إنسان نصفه شتاء ونصفه صيف - ⏱️ 30 دقيقة",
   "ارسم زهرة غريبة الشكل - ⏱️ 10 دقائق",
   "ارسم حيوان بأربع أعين - ⏱️ 10 دقائق",
   "ارسم ساعة على شكل زهرة - ⏱️ 10 دقائق",
@@ -185,106 +190,138 @@ const builtInIdeas = [
   "ارسم بطريق في الصحراء - ⏱️ 10 دقائق",
   "ارسم قطار يمر في بحر - ⏱️ 15 دقيقة",
   "ارسم خريطة لعالم خيالي - ⏱️ 30 دقيقة",
-  "ارسم عين بداخل عين - ⏱️ 5 دقائق"
 ];
-    const savedIdeas = JSON.parse(localStorage.getItem('customIdeas') || '[]');
-    const customSet = new Set(savedIdeas);
-    let allIdeas = [...builtInIdeas, ...savedIdeas];
-    const groups = { easy: [], medium: [], hard: [], custom: savedIdeas };
-    allIdeas.forEach(txt => {
-      const m = txt.match(/⏱️\s*(\d+)/);
-      const minutes = m ? parseInt(m[1], 10) : 10;
-      if (minutes <= 10) groups.easy.push(txt);
-      else if (minutes <= 20) groups.medium.push(txt);
-      else groups.hard.push(txt);
-    });
-    const usedByLevel = { easy: new Set(), medium: new Set(), hard: new Set(), random: new Set(), custom: new Set() };
-    let prevLevel = null, currentLevel = null;
-    let currentSet = [], used, timerInterval, initialDuration, remainingTime, points = 0, currentIdea = '';
-    const scoreEl = document.getElementById('score');
-    const backBtn = document.getElementById('backBtn');
-    const menuEl = document.getElementById('menu');
-    const cardEl = document.getElementById('card');
-    const startBtn = document.getElementById('startBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const resumeBtn = document.getElementById('resumeBtn');
-    const pointButtons = document.getElementById('pointButtons');
-    const finishEarlyBtn = document.getElementById('finishEarlyBtn');
-    const finishLateBtn = document.getElementById('finishLateBtn');
-    const failBtn = document.getElementById('failBtn');
-    const ideaEl = document.getElementById('idea');
-    const timerEl = document.getElementById('timer');
-    function showMenu() {
-      clearInterval(timerInterval);
-      timerEl.innerText = '';
-      startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
-      pointButtons.style.display = 'none';
-      menuEl.classList.add('active'); cardEl.classList.remove('active'); backBtn.classList.remove('show');
-    }
-    function init(level) {
-      if (prevLevel !== level) usedByLevel[level].clear(); prevLevel = level;
-      clearInterval(timerInterval); timerEl.innerText = '';
-      startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none'; pointButtons.style.display = 'none'; ideaEl.innerText = '';
-      currentLevel = level;
-      currentSet = level === 'random' ? allIdeas : level === 'custom' ? savedIdeas : groups[level];
-      used = usedByLevel[level];
-      if (level === 'custom' && savedIdeas.length === 0) {
-        ideaEl.innerText = 'لا توجد أفكار مضافة.\nيمكنك إضافة أفكار جديدة من الخانة باليسار.';
-        document.querySelector('button.main').style.display = 'none';
-      } else {
-        ideaEl.style.textAlign = 'center';
-        document.querySelector('button.main').style.display = 'inline-block';
-      }
-      menuEl.classList.remove('active'); cardEl.classList.add('active'); backBtn.classList.add('show');
-    }
-    function generateIdea() {
-      clearInterval(timerInterval); timerEl.innerText = '';
-      startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none'; pointButtons.style.display = 'none'; ideaEl.style.textAlign = 'center';
-      if (used.size === currentSet.length) { ideaEl.innerText = 'تم عرض كل الأفكار!'; return; }
-      let txt; do { txt = currentSet[Math.floor(Math.random()*currentSet.length)]; } while (used.has(txt)); used.add(txt);
-      ideaEl.innerText = txt; currentIdea = txt;
-      const m = txt.match(/⏱️\s*(\d+)/);
-      if (m) { initialDuration = parseInt(m[1],10)*60; remainingTime = initialDuration; startBtn.style.display = 'inline-block'; }
-    }
-    function calculatePrimary() { return customSet.has(currentIdea)?10: initialDuration===300?10: initialDuration===600?20: initialDuration===900?30: initialDuration===1800?50:0; }
-    function calculateLate() { return calculatePrimary()/2; }
-    function updateTimer() { const m=Math.floor(remainingTime/60), s=remainingTime%60; timerEl.innerText = `⏱️ الوقت المتبقي: ${m}:${s<10?'0':''}${s}`; }
-    function startTimer() {
-      startBtn.style.display='none'; stopBtn.style.display='inline-block'; resumeBtn.style.display='none'; pointButtons.style.display='flex';
-      finishEarlyBtn.style.display='inline-block'; finishLateBtn.style.display=failBtn.style.display='none';
-      finishEarlyBtn.textContent = `انتهيت +${calculatePrimary()}`; updateTimer();
-      timerInterval = setInterval(() => {
-        remainingTime--;
-        if (remainingTime<=0) { clearInterval(timerInterval); timerEl.innerText='⏱️ انتهى الوقت!'; stopBtn.style.display=resumeBtn.style.display='none'; finishEarlyBtn.style.display='none'; finishLateBtn.style.display=failBtn.style.display='inline-block'; finishLateBtn.textContent=`انتهيت +${calculateLate()}`; playAlarmRepeatedly(4); } else updateTimer();
-      },1000);
-    }
-    function stopTimer() { clearInterval(timerInterval); timerEl.innerText='⏱️ تم إيقاف المؤقت.'; stopBtn.style.display='none'; resumeBtn.style.display='inline-block'; }
-    function resumeTimer() { resumeBtn.style.display='none'; startTimer(); }
-    finishEarlyBtn.onclick = () => { clearInterval(timerInterval); points += calculatePrimary(); scoreEl.textContent = `النقاط: ${points}`; generateIdea(); };
-    finishLateBtn.onclick = () => { clearInterval(timerInterval); points += calculateLate(); scoreEl.textContent = `النقاط: ${points}`; generateIdea(); };
-    failBtn.onclick = () => { clearInterval(timerInterval); scoreEl.textContent = `النقاط: ${points}`; generateIdea(); };
-    function addIdea() {
-      const txt = document.getElementById('newIdea').value.trim(); if (!txt) return;
-      const formatted = `${txt} - ⏱️ 10 دقائق`;
-      allIdeas.push(formatted); savedIdeas.push(formatted); customSet.add(formatted);
-      localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
-      document.getElementById('newIdea').value = '';
-      alert('تمت إضافة فكرتك!');
-    }
-    function removeIdea() {
-      const txt = document.getElementById('newIdea').value.trim(); if (!txt) return alert('اكتب الفكرة لحذفها.');
-      const formatted = `${txt} - ⏱️ 10 دقائق`;
-      const idx = savedIdeas.indexOf(formatted); if (idx === -1) return alert('هذه الفكرة غير موجودة.');
-      savedIdeas.splice(idx, 1); allIdeas = allIdeas.filter(i=>i!==formatted); customSet.delete(formatted);
-      localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
-      document.getElementById('newIdea').value = '';
-      alert('تم حذف الفكرة!');
-    }
-    function playAlarmRepeatedly(times) {
-      const alarm = document.getElementById('alarmSound'); let count = 0;
-      const play = () => { if (count < times) { alarm.currentTime = 0; alarm.play(); count++; setTimeout(play, 1000); }};
-      play();
-    }
+
+const savedIdeas = JSON.parse(localStorage.getItem('customIdeas') || '[]');
+const customSet = new Set(savedIdeas);
+let allIdeas = [...builtInIdeas, ...savedIdeas];
+const groups = { easy: [], medium: [], hard: [], custom: savedIdeas };
+allIdeas.forEach(txt => {
+  const m = txt.match(/⏱️\s*(\d+)/);
+  const minutes = m ? parseInt(m[1], 10) : 10;
+  if (minutes <= 10) groups.easy.push(txt);
+  else if (minutes <= 20) groups.medium.push(txt);
+  else groups.hard.push(txt);
+});
+const usedByLevel = { easy: new Set(), medium: new Set(), hard: new Set(), random: new Set(), custom: new Set() };
+let prevLevel = null, currentLevel = null;
+let currentSet = [], used, timerInterval, initialDuration, remainingTime, points = 0, currentIdea = '';
+const scoreEl = document.getElementById('score');
+const backBtn = document.getElementById('backBtn');
+const menuEl = document.getElementById('menu');
+const cardEl = document.getElementById('card');
+const startBtn = document.getElementById('startBtn');
+const stopBtn = document.getElementById('stopBtn');
+const resumeBtn = document.getElementById('resumeBtn');
+const pointButtons = document.getElementById('pointButtons');
+const finishEarlyBtn = document.getElementById('finishEarlyBtn');
+const finishLateBtn = document.getElementById('finishLateBtn');
+const failBtn = document.getElementById('failBtn');
+const ideaEl = document.getElementById('idea');
+const timerEl = document.getElementById('timer');
+
+// دالة فتح صفحة الرسم
+function openDrawingPage() {
+    window.open('drawing.html', '_blank'); // يفتح صفحة جديدة للكود الثاني
+}
+
+function showMenu() {
+  clearInterval(timerInterval);
+  timerEl.innerText = '';
+  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
+  pointButtons.style.display = 'none';
+  menuEl.classList.add('active'); cardEl.classList.remove('active'); backBtn.classList.remove('show');
+}
+
+function init(level) {
+  if (prevLevel !== level) usedByLevel[level].clear(); prevLevel = level;
+  clearInterval(timerInterval); timerEl.innerText = '';
+  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none'; pointButtons.style.display = 'none'; ideaEl.innerText = '';
+  currentLevel = level;
+  currentSet = level === 'random' ? allIdeas : level === 'custom' ? savedIdeas : groups[level];
+  used = usedByLevel[level];
+  if (level === 'custom' && savedIdeas.length === 0) {
+    ideaEl.innerText = 'لا توجد أفكار مضافة.\nيمكنك إضافة أفكار جديدة من الخانة باليسار.';
+    document.querySelector('button.main').style.display = 'none';
+  } else {
+    ideaEl.style.textAlign = 'center';
+    document.querySelector('button.main').style.display = 'inline-block';
+  }
+  menuEl.classList.remove('active'); cardEl.classList.add('active'); backBtn.classList.add('show');
+}
+
+function generateIdea() {
+  clearInterval(timerInterval); timerEl.innerText = '';
+  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none'; pointButtons.style.display = 'none'; ideaEl.style.textAlign = 'center';
+  if (used.size === currentSet.length) { ideaEl.innerText = 'تم عرض كل الأفكار!'; return; }
+  let txt; do { txt = currentSet[Math.floor(Math.random()*currentSet.length)]; } while (used.has(txt)); used.add(txt);
+  ideaEl.innerText = txt; currentIdea = txt;
+  const m = txt.match(/⏱️\s*(\d+)/);
+  if (m) { initialDuration = parseInt(m[1],10)*60; remainingTime = initialDuration; startBtn.style.display = 'inline-block'; }
+}
+
+function calculatePrimary() { return customSet.has(currentIdea)?10: initialDuration===300?10: initialDuration===600?20: initialDuration===900?30: initialDuration===1800?50:0; }
+function calculateLate() { return calculatePrimary()/2; }
+
+function updateTimer() { const m=Math.floor(remainingTime/60), s=remainingTime%60; timerEl.innerText = `⏱️ الوقت المتبقي: ${m}:${s<10?'0':''}${s}`; }
+function startTimer() {
+  startBtn.style.display='none'; stopBtn.style.display='inline-block'; resumeBtn.style.display='none'; pointButtons.style.display='flex';
+  document.getElementById('startDrawingBtn').style.display = 'inline-block'; // اظهار الزر هنا
+  finishEarlyBtn.style.display='inline-block'; finishLateBtn.style.display=failBtn.style.display='none';
+  finishEarlyBtn.textContent = `انتهيت +${calculatePrimary()}`; updateTimer();
+  timerInterval = setInterval(() => {
+    remainingTime--;
+    if (remainingTime<=0) { clearInterval(timerInterval); timerEl.innerText='⏱️ انتهى الوقت!'; stopBtn.style.display=resumeBtn.style.display='none'; finishEarlyBtn.style.display='none'; finishLateBtn.style.display=failBtn.style.display='inline-block'; finishLateBtn.textContent=`انتهيت +${calculateLate()}`; playAlarmRepeatedly(4); } else updateTimer();
+  },1000);
+}
+function stopTimer() { clearInterval(timerInterval); timerEl.innerText='⏱️ تم إيقاف المؤقت.'; stopBtn.style.display='none'; resumeBtn.style.display='inline-block'; }
+function resumeTimer() { resumeBtn.style.display='none'; startTimer(); }
+
+finishEarlyBtn.onclick = () => { 
+  clearInterval(timerInterval); 
+  points += calculatePrimary(); 
+  scoreEl.textContent = `النقاط: ${points}`; 
+  generateIdea(); 
+  document.getElementById('startDrawingBtn').style.display = 'none'; // إخفاء زر "ابدأ الرسم"
+};
+finishLateBtn.onclick = () => { 
+  clearInterval(timerInterval); 
+  points += calculateLate(); 
+  scoreEl.textContent = `النقاط: ${points}`; 
+  generateIdea(); 
+  document.getElementById('startDrawingBtn').style.display = 'none'; // إخفاء زر "ابدأ الرسم"
+};
+failBtn.onclick = () => { 
+  clearInterval(timerInterval); 
+  scoreEl.textContent = `النقاط: ${points}`; 
+  generateIdea(); 
+  document.getElementById('startDrawingBtn').style.display = 'none'; // إخفاء زر "ابدأ الرسم"
+};
+
+function addIdea() {
+  const txt = document.getElementById('newIdea').value.trim(); if (!txt) return;
+  const formatted = `${txt} - ⏱️ 10 دقائق`;
+  allIdeas.push(formatted); savedIdeas.push(formatted); customSet.add(formatted);
+  localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
+  document.getElementById('newIdea').value = '';
+  alert('تمت إضافة فكرتك!');
+}
+
+function removeIdea() {
+  const txt = document.getElementById('newIdea').value.trim(); if (!txt) return alert('اكتب الفكرة لحذفها.');
+  const formatted = `${txt} - ⏱️ 10 دقائق`;
+  const idx = savedIdeas.indexOf(formatted); if (idx === -1) return alert('هذه الفكرة غير موجودة.');
+  savedIdeas.splice(idx, 1); allIdeas = allIdeas.filter(i=>i!==formatted); customSet.delete(formatted);
+  localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
+  document.getElementById('newIdea').value = '';
+  alert('تم حذف الفكرة!');
+}
+
+function playAlarmRepeatedly(times) {
+  const alarm = document.getElementById('alarmSound'); let count = 0;
+  const play = () => { if (count < times) { alarm.currentTime = 0; alarm.play(); count++; setTimeout(play, 1000); }};
+  play();
+}
   </script>
 </body>
 </html>
