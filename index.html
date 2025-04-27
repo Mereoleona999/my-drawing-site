@@ -8,6 +8,46 @@
   <style>
     html, body { margin: 0; padding: 0; overflow: hidden; height: 100vh; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #41493b; display: flex; align-items: center; justify-content: center; flex-direction: column; }
+
+    /* === إضافة الشريط الجانبي المصغّر === */
+    #sidebar {
+      position: fixed;
+      top: 60px;           
+      left: 10px;         
+      width: 200px;        
+      height: 900px;       
+      background-color: #d4f7d1;
+      overflow-y: auto;
+      padding: 10px;
+      box-sizing: border-box;
+      border-radius: 15px; 
+    }
+    .gallery-item { margin-bottom: 12px; }
+    .gallery-item img {
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .gallery-item .caption {
+      margin-top: 4px;
+      text-align: center;
+      color: #333;
+      font-size: 13px;
+    }
+    .enlarged {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      max-width: 80%;
+      max-height: 80%;
+      transform: translate(-50%, -50%);
+      z-index: 10000;
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+      border-radius: 12px;
+    }
+    /* === نهاية إضافة الشريط الجانبي === */
+
     #menu, #card { display: none; }
     #menu.active {
       display: grid;
@@ -25,7 +65,7 @@
     .back-btn.show { display: block; }
     #score { position: fixed; top: 10px; right: 10px; font-size: 40px; color: #fff; z-index: 100; }
     h1 { margin: 0; font-size: 24px; color: white; }
-    button.main { background-color: #00aaff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 15px 0; } /* تقليل حجم الزر */
+    button.main { background-color: #00aaff; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 15px 0; }
     button.main:hover { background-color: #008ecc; }
     #idea { font-size: 18px; font-weight: bold; color: white; max-height: 100px; overflow-y: auto; width: 100%; white-space: pre-wrap; text-align: center; }
     #timer { font-size: 20px; color: #ff5555; margin-top: 10px; }
@@ -39,10 +79,13 @@
     .add-idea input { width: 200px; padding: 8px 12px; border: none; border-radius: 8px; background: rgba(255,255,255,0.5); font-size: 16px; outline: none; }
     .add-idea button { background-color: #90be6d; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 16px; cursor: pointer; }
     footer { position: fixed; bottom: 5px; width: 100%; text-align: center; font-size: 14px; color: #ccc; }
-    #startDrawingBtn { margin-top: 10px; width: 75%; max-width: 300px; } /* ضبط عرض الزر ليكون أقل عرض */
+    #startDrawingBtn { margin-top: 10px; width: 75%; max-width: 300px; }
   </style>
 </head>
 <body>
+  <!-- الشريط الجانبي -->
+  <div id="sidebar"></div>
+
   <button class="back-btn" id="backBtn" onclick="showMenu()">⬅️ رجوع</button>
   <div id="menu" class="active">
     <button class="menu-btn" onclick="init('easy')">سهل</button>
@@ -79,7 +122,7 @@
   </div>
   <footer>✨ صُنع بحب بواسطة <strong>mereoleona ❤️</strong></footer>
   <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
-  <script>
+<script>
 const builtInIdeas = [
   "ارسم روبوت يحاول الطبخ لأول مرة - ⏱️ 30 دقيقة",
   "ارسم فتاة تقرأ كتابًا وسط عاصفة - ⏱️ 30 دقيقة",
@@ -220,9 +263,8 @@ const failBtn = document.getElementById('failBtn');
 const ideaEl = document.getElementById('idea');
 const timerEl = document.getElementById('timer');
 
-// دالة فتح صفحة الرسم
 function openDrawingPage() {
-    window.open('https://my-drawing-tool.pages.dev/', '_blank'); // يفتح صفحة جديدة للكود الثاني
+  window.open('https://my-drawing-tool.pages.dev/', '_blank');
 }
 
 function showMenu() {
@@ -236,7 +278,8 @@ function showMenu() {
 function init(level) {
   if (prevLevel !== level) usedByLevel[level].clear(); prevLevel = level;
   clearInterval(timerInterval); timerEl.innerText = '';
-  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none'; pointButtons.style.display = 'none'; ideaEl.innerText = '';
+  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
+  pointButtons.style.display = 'none'; ideaEl.innerText = '';
   currentLevel = level;
   currentSet = level === 'random' ? allIdeas : level === 'custom' ? savedIdeas : groups[level];
   used = usedByLevel[level];
@@ -252,9 +295,11 @@ function init(level) {
 
 function generateIdea() {
   clearInterval(timerInterval); timerEl.innerText = '';
-  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none'; pointButtons.style.display = 'none'; ideaEl.style.textAlign = 'center';
+  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
+  pointButtons.style.display = 'none'; ideaEl.style.textAlign = 'center';
   if (used.size === currentSet.length) { ideaEl.innerText = 'تم عرض كل الأفكار!'; return; }
-  let txt; do { txt = currentSet[Math.floor(Math.random()*currentSet.length)]; } while (used.has(txt)); used.add(txt);
+  let txt; do { txt = currentSet[Math.floor(Math.random()*currentSet.length)]; } while (used.has(txt));
+  used.add(txt);
   ideaEl.innerText = txt; currentIdea = txt;
   const m = txt.match(/⏱️\s*(\d+)/);
   if (m) { initialDuration = parseInt(m[1],10)*60; remainingTime = initialDuration; startBtn.style.display = 'inline-block'; }
@@ -266,36 +311,44 @@ function calculateLate() { return calculatePrimary()/2; }
 function updateTimer() { const m=Math.floor(remainingTime/60), s=remainingTime%60; timerEl.innerText = `⏱️ الوقت المتبقي: ${m}:${s<10?'0':''}${s}`; }
 function startTimer() {
   startBtn.style.display='none'; stopBtn.style.display='inline-block'; resumeBtn.style.display='none'; pointButtons.style.display='flex';
-  document.getElementById('startDrawingBtn').style.display = 'inline-block'; // اظهار الزر هنا
+  document.getElementById('startDrawingBtn').style.display = 'inline-block';
   finishEarlyBtn.style.display='inline-block'; finishLateBtn.style.display=failBtn.style.display='none';
   finishEarlyBtn.textContent = `انتهيت +${calculatePrimary()}`; updateTimer();
   timerInterval = setInterval(() => {
     remainingTime--;
-    if (remainingTime<=0) { clearInterval(timerInterval); timerEl.innerText='⏱️ انتهى الوقت!'; stopBtn.style.display=resumeBtn.style.display='none'; finishEarlyBtn.style.display='none'; finishLateBtn.style.display=failBtn.style.display='inline-block'; finishLateBtn.textContent=`انتهيت +${calculateLate()}`; playAlarmRepeatedly(4); } else updateTimer();
+    if (remainingTime<=0) {
+      clearInterval(timerInterval);
+      timerEl.innerText='⏱️ انتهى الوقت!';
+      stopBtn.style.display=resumeBtn.style.display='none';
+      finishEarlyBtn.style.display='none';
+      finishLateBtn.style.display=failBtn.style.display='inline-block';
+      finishLateBtn.textContent=`انتهيت +${calculateLate()}`;
+      playAlarmRepeatedly(4);
+    } else updateTimer();
   },1000);
 }
 function stopTimer() { clearInterval(timerInterval); timerEl.innerText='⏱️ تم إيقاف المؤقت.'; stopBtn.style.display='none'; resumeBtn.style.display='inline-block'; }
 function resumeTimer() { resumeBtn.style.display='none'; startTimer(); }
 
-finishEarlyBtn.onclick = () => { 
-  clearInterval(timerInterval); 
-  points += calculatePrimary(); 
-  scoreEl.textContent = `النقاط: ${points}`; 
-  generateIdea(); 
-  document.getElementById('startDrawingBtn').style.display = 'none'; // إخفاء زر "ابدأ الرسم"
+finishEarlyBtn.onclick = () => {
+  clearInterval(timerInterval);
+  points += calculatePrimary();
+  scoreEl.textContent = `النقاط: ${points}`;
+  generateIdea();
+  document.getElementById('startDrawingBtn').style.display = 'none';
 };
-finishLateBtn.onclick = () => { 
-  clearInterval(timerInterval); 
-  points += calculateLate(); 
-  scoreEl.textContent = `النقاط: ${points}`; 
-  generateIdea(); 
-  document.getElementById('startDrawingBtn').style.display = 'none'; // إخفاء زر "ابدأ الرسم"
+finishLateBtn.onclick = () => {
+  clearInterval(timerInterval);
+  points += calculateLate();
+  scoreEl.textContent = `النقاط: ${points}`;
+  generateIdea();
+  document.getElementById('startDrawingBtn').style.display = 'none';
 };
-failBtn.onclick = () => { 
-  clearInterval(timerInterval); 
-  scoreEl.textContent = `النقاط: ${points}`; 
-  generateIdea(); 
-  document.getElementById('startDrawingBtn').style.display = 'none'; // إخفاء زر "ابدأ الرسم"
+failBtn.onclick = () => {
+  clearInterval(timerInterval);
+  scoreEl.textContent = `النقاط: ${points}`;
+  generateIdea();
+  document.getElementById('startDrawingBtn').style.display = 'none';
 };
 
 function addIdea() {
@@ -322,6 +375,44 @@ function playAlarmRepeatedly(times) {
   const play = () => { if (count < times) { alarm.currentTime = 0; alarm.play(); count++; setTimeout(play, 1000); }};
   play();
 }
-  </script>
+
+// === معرض جانبي مع 5 صور مثال باسم ChatGPT ===
+const galleryItems = [
+  { url: 'https://i.imgur.com/8iXsHio.jpeg', name: 'ChatGPT' },
+  { url: 'https://i.imgur.com/XAvFHFZ.jpeg', name: 'ChatGPT' },
+  { url: 'https://i.imgur.com/6qg3Q95.jpeg', name: 'ChatGPT' },
+  { url: 'https://i.imgur.com/yVKBqwQ.jpeg', name: 'ChatGPT' },
+  { url: 'https://i.imgur.com/Bi3YA7p.jpeg', name: 'ChatGPT' },
+];
+
+function renderGallery() {
+  const sidebar = document.getElementById('sidebar');
+  sidebar.innerHTML = '';
+  galleryItems.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'gallery-item';
+    const img = document.createElement('img');
+    img.src = item.url;
+    img.alt = item.name;
+    img.addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.gallery-item img.enlarged').forEach(i => i.classList.remove('enlarged'));
+      img.classList.add('enlarged');
+    });
+    div.appendChild(img);
+    const caption = document.createElement('div');
+    caption.className = 'caption';
+    caption.innerText = item.name;
+    div.appendChild(caption);
+    sidebar.appendChild(div);
+  });
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.gallery-item img.enlarged').forEach(i => i.classList.remove('enlarged'));
+});
+
+renderGallery();
+</script>
 </body>
 </html>
