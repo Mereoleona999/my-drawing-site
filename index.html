@@ -6,22 +6,66 @@
   <title>أفكار رسم عشوائية</title>
   <link rel="icon" href="https://static-00.iconduck.com/assets.00/artist-palette-emoji-2048x1860-ns605395.png" type="image/png" />
   <style>
+/* طبقة الظل التي تغطي كامل الشاشة */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+}
+
+/* الصورة المكبرة داخل الـ overlay */
+.overlay img {
+  max-width: 90vw;
+  max-height: 90vh;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+  cursor: default;
+}
+
     html, body { margin: 0; padding: 0; overflow: hidden; height: 100vh; }
     body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #41493b; display: flex; align-items: center; justify-content: center; flex-direction: column; }
 
-    /* === إضافة الشريط الجانبي المصغّر === */
+    /* === بورقر بوتون (يسار، أيقونة قائمة) === */
+    #burgerButton {
+      position: fixed;
+      top: 60px;
+      left: 15px;      /* تح moved to left */
+      right: auto;
+      z-index: 20000;
+      background: #00aaff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      font-size: 24px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #burgerButton:hover { background: #008ecc; }
+
+    /* === الشريط الجانبي المصغّر === */
     #sidebar {
       position: fixed;
-      top: 60px;           
-      left: 10px;         
-      width: 200px;        
-      height: 800px;       
+      top: 120px;
+      left: 10px;
+      width: 200px;
+      height: 700px;
       background-color: #d4f7d1;
       overflow-y: auto;
       padding: 10px;
       box-sizing: border-box;
-      border-radius: 15px; 
+      border-radius: 15px;
+      transform: translateX(-250px);
+      transition: transform 0.3s ease;
     }
+    #sidebar.active { transform: translateX(0); }
+
     .gallery-item { margin-bottom: 12px; }
     .gallery-item img {
       width: 100%;
@@ -35,18 +79,23 @@
       color: #333;
       font-size: 13px;
     }
+
+    /* تعديل حجم ومقاسات الصورة المكبرة لتبقى بابعاد سليمة */
     .enlarged {
       position: fixed;
       top: 50%;
       left: 50%;
-      max-width: 80%;
-      max-height: 80%;
+      width: auto;
+      height: auto;
+      max-width: 90vw;
+      max-height: 90vh;
       transform: translate(-50%, -50%);
       z-index: 10000;
       box-shadow: 0 0 10px rgba(0,0,0,0.5);
       border-radius: 12px;
     }
-    /* === نهاية إضافة الشريط الجانبي === */
+
+    /* === نهاية الشريط الجانبي === */
 
     #menu, #card { display: none; }
     #menu.active {
@@ -80,9 +129,117 @@
     .add-idea button { background-color: #90be6d; color: white; border: none; padding: 8px 16px; border-radius: 8px; font-size: 16px; cursor: pointer; }
     footer { position: fixed; bottom: 5px; width: 100%; text-align: center; font-size: 14px; color: #ccc; }
     #startDrawingBtn { margin-top: 10px; width: 75%; max-width: 300px; }
+/* ====== responsive للتابلت ====== */
+@media (max-width: 768px) {
+  /* تخفيف عرض وطول السايدبار */
+  #sidebar {
+    width: 150px;
+    height: calc(100vh - 100px);
+  }
+  /* تعديل كرت الفكرة ليملأ العرض نسبياً */
+  .card {
+    width: 90%;
+    max-width: 400px;
+    height: auto;
+    padding: 15px;
+  }
+  /* تخفيف حجم أزرار القائمة */
+  #menu.active {
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 50px;
+    gap: 15px;
+  }
+  .menu-btn {
+    font-size: 18px;
+  }
+  /* تصغير خط النقاط */
+  #score {
+    font-size: 32px;
+    top: 5px;
+    right: 5px;
+  }
+  /* حقول إضافة الفكرة */
+  .add-idea input {
+    width: 150px;
+    font-size: 14px;
+  }
+  .add-idea button {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+  /* زر ابدأ الرسم */
+  #startDrawingBtn {
+    width: 80%;
+  }
+}
+
+/* ====== responsive للموبايل ====== */
+@media (max-width: 480px) {
+  /* تعديل مكان وحجم زر البرغر */
+  #burgerButton {
+    top: 10px;
+    left: 10px;
+    padding: 8px 10px;
+    font-size: 20px;
+  }
+  /* سايدبار أصغر */
+  #sidebar {
+    top: 50px;
+    left: 5px;
+    width: 120px;
+    height: calc(100vh - 60px);
+  }
+  /* القائمة بعمود واحد */
+  #menu.active {
+    grid-template-columns: 1fr;
+  }
+  .menu-btn {
+    font-size: 16px;
+    padding: 8px 0;
+  }
+  .menu-btn.custom-btn {
+    grid-column: 1 / -1;
+  }
+  /* كرت الفكرة يملأ تقريباً العرض كله */
+  .card {
+    width: 95%;
+    padding: 10px;
+  }
+  h1 {
+    font-size: 20px;
+  }
+  button.main {
+    font-size: 14px;
+    padding: 8px 16px;
+  }
+  #idea {
+    font-size: 16px;
+    max-height: 80px;
+  }
+  #timer {
+    font-size: 18px;
+  }
+  .time-buttons button,
+  .point-buttons button {
+    font-size: 14px;
+    padding: 5px 10px;
+  }
+  /* إضافة الفكرة أصغر ومُحاذاة */
+  .add-idea {
+    bottom: 10px;
+    left: 5px;
+  }
+  .add-idea input {
+    width: 120px;
+  }
+}
+
   </style>
 </head>
 <body>
+  <!-- زر البورقر (قائمة) -->
+  <button id="burgerButton" onclick="toggleSidebar()">☰</button>
+
   <!-- الشريط الجانبي -->
   <div id="sidebar"></div>
 
@@ -112,7 +269,7 @@
     </div>
   </div>
   
-  <!-- زر ابدأ الرسم موضوع تحت المربع بشكل مركزي -->
+  <!-- زر ابدأ الرسم -->
   <button class="main" id="startDrawingBtn" style="display: none;" onclick="openDrawingPage()">ابدأ الرسم</button>
 
   <div class="add-idea">
@@ -123,269 +280,274 @@
   <footer>✨ صُنع بحب بواسطة <strong>mereoleona ❤️</strong></footer>
   <audio id="alarmSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>
 <script>
-const builtInIdeas = [
-  "ارسم روبوت يحاول الطبخ لأول مرة - ⏱️ 30 دقيقة",
-  "ارسم فتاة تقرأ كتابًا وسط عاصفة - ⏱️ 30 دقيقة",
-  "ارسم سمكة تطير في السماء وتلبس نظارات - ⏱️ 15 دقيقة",
-  "ارسم شخصية باستخدام أشكال دائرية فقط - ⏱️ 5 دقائق",
-  "ارسم حيوان باستخدام مثلثات فقط - ⏱️ 5 دقائق",
-  "ارسم نص وجه إنسان ونص وجه قطة - ⏱️ 5 دقائق",
-  "ارسم بيت على شكل فطر - ⏱️ 10 دقائق",
-  "ارسم وجه مكوّن من نباتات - ⏱️ 10 دقائق",
-  "ارسم مدينة فوق ظهر تنين - ⏱️ 30 دقيقة",
-  "ارسم روبوت يحاول الرقص - ⏱️ 15 دقيقة",
-  "ارسم قطة ترتدي درع فارس - ⏱️ 15 دقيقة",
-  "ارسم شجرة فيها أبواب ونوافذ - ⏱️ 5 دقائق",
-  "ارسم يد تمسك المجرة - ⏱️ 15 دقيقة",
-  "ارسم شخصية بأسلوب بيكسل - ⏱️ 30 دقيقة",
-  "ارسم شخصية بدون ملامح - ⏱️ 5 دقائق",
-  "ارسم كوب عصير يحتوي على كواكب - ⏱️ 10 دقائق",
-  "ارسم عالم داخل نظارة شمسية - ⏱️ 15 دقيقة",
-  "ارسم فتاة ترتدي فستان من الزهور - ⏱️ 5 دقائق",
-  "ارسم مدينة تحت البحر - ⏱️ 10 دقائق",
-  "ارسم عين ترى الكون - ⏱️ 15 دقيقة",
-  "ارسم حيوان خيالي بدمج ٣ حيوانات - ⏱️ 15 دقيقة",
-  "ارسم نفسك ككرتون - ⏱️ 10 دقائق",
-  "ارسم شخصية من الخلف فقط - ⏱️ 5 دقائق",
-  "ارسم ساندويتش فيه مدينة - ⏱️ 5 دقائق",
-  "ارسم طفل يطير بواسطة بالونات - ⏱️ 5 دقائق",
-  "ارسم ظل يخالف شكل صاحبه - ⏱️ 10 دقائق",
-  "ارسم نافذة تطل على عالم خيالي - ⏱️ 15 دقيقة",
-  "ارسم شخصية مرسومة بخط واحد فقط - ⏱️ 5 دقائق",
-  "ارسم وردة تنمو من كتاب - ⏱️ 5 دقائق",
-  "ارسم عالم داخل قطرة ماء - ⏱️ 10 دقائق",
-  "ارسم قطة تعزف على آلة موسيقية - ⏱️ 15 دقيقة",
-  "ارسم كرسي على شكل مخلوق - ⏱️ 10 دقائق",
-  "ارسم طريق ينتهي في الفضاء - ⏱️ 15 دقيقة",
-  "ارسم كائن شفاف - ⏱️ 10 دقائق",
-  "ارسم طاولة فطور لكن العناصر تتحرك - ⏱️ 30 دقيقة",
-  "ارسم عالم داخل مصباح - ⏱️ 30 دقيقة",
-  "ارسم الساعة وهي تذوب - ⏱️ 15 دقيقة",
-  "ارسم مفتاح قديم – ⏱️ 5 دقائق",
-  "ارسم قلادة – ⏱️ 5 دقائق",
-  "ارسم ريشة طائر – ⏱️ 5 دقائق",
-  "ارسم وردة ذابلة – ⏱️ 5 دقائق",
-  "ارسم قنديل بحر – ⏱️ 10 دقائق",
-  "ارسم لوحة إعلانات في مدينة – ⏱️ 15 دقيقة",
-  "ارسم خريطة كنز – ⏱️ 10 دقائق",
-  "ارسم فتاة تطير فوق مدينة – ⏱️ 15 دقيقة",
-  "ارسم بالونات تطير فوق بحر – ⏱️ 10 دقائق",
-  "ارسم عين تنعكس فيها شجرة – ⏱️ 15 دقيقة",
-  "ارسم وجه مغطى بأوراق الشجر – ⏱️ 15 دقيقة",
-  "ارسم درج يصل إلى السحاب – ⏱️ 15 دقيقة",
-  "ارسم شارع في يوم ممطر – ⏱️ 15 دقيقة",
-  "ارسم سيارة تطير في السماء – ⏱️ 15 دقيقة",
-  "ارسم زرافة ترتدي قبعة ونظارات – ⏱️ 15 دقيقة",
-  "ارسم خيمة على ظهر سلحفاة – ⏱️ 30 دقيقة",
-  "ارسم قطار يسير بين النجوم – ⏱️ 30 دقيقة",
-  "ارسم فتاة تركب على سمكة ضخمة – ⏱️ 30 دقيقة",
-  "ارسم قمر من الجبن – ⏱️ 15 دقيقة",
-  "ارسم مدينة داخل زجاجة – ⏱️ 30 دقيقة",
-  "ارسم بيضة تنكسر و داخلها حديقة – ⏱️ 30 دقيقة",
-  "ارسم طفل يتزلج على قوس قزح – ⏱️ 30 دقيقة",
-  "ارسم سفينة طائرة تمر فوق جبال – ⏱️ 30 دقيقة",
-  "ارسم دراجة تطير بأجنحة – ⏱️ 15 دقيقة",
-  "ارسم كوكب له وجه إنساني – ⏱️ 30 دقيقة",
-  "ارسم ليمونة فيها بحر – ⏱️ 15 دقيقة",
-  "ارسم قبعة تطير – ⏱️ 10 دقائق",
-  "ارسم شجرة على شكل إنسان – ⏱️ 15 دقيقة",
-  "ارسم بيضة ديناصور على وشك الفقس – ⏱️ 10 دقائق",
-  "ارسم قارب ورقي في بحر – ⏱️ 10 دقائق",
-  "ارسم كوب شاي فيه سماء وغيوم – ⏱️ 15 دقيقة",
-  "ارسم حاسبة فيها قطة – ⏱️ 5 دقائق",
-  "ارسم قلب فيه مدينة – ⏱️ 30 دقيقة",
-  "ارسم كوب قهوة على شكل جبل – ⏱️ 15 دقيقة",
-  "ارسم نص وجه إنسان ونص وجه روبوت - ⏱️ 15 دقيقة",
-  "ارسم ديناصور يركب دراجة - ⏱️ 15 دقيقة",
-  "ارسم فضاء بدون استخدام لون أسود - ⏱️ 10 دقائق",
-  "ارسم طفل يركب على سحابة - ⏱️ 15 دقيقة",
-  "ارسم مدينة فوق سلحفاة عملاقة - ⏱️ 30 دقيقة",
-  "ارسم سحلية على شكل ناطحة سحاب - ⏱️ 30 دقيقة",
-  "ارسم ساعة بدون أرقام - ⏱️ 5 دقائق",
-  "ارسم مشاعرك الحالية ككائن - ⏱️ 15 دقيقة",
-  "ارسم باب مفتوح على عالم آخر - ⏱️ 15 دقيقة",
-  "ارسم شيء غير حي كأنه حي - ⏱️ 10 دقائق",
-  "ارسم حيوان بعين واحدة كبيرة جدًا - ⏱️ 5 دقائق",
-  "ارسم بحر مقلوب - ⏱️ 10 دقائق",
-  "ارسم أسد نائم وسط زهور - ⏱️ 30 دقيقة",
-  "ارسم حقيبة مليئة بالكواكب - ⏱️ 30 دقيقة",
-  "ارسم غيمة على هيئة قطة - ⏱️ 5 دقائق",
-  "ارسم بيت من الورق - ⏱️ 5 دقائق",
-  "ارسم زهرة داخل مصباح - ⏱️ 10 دقائق",
-  "ارسم إنسان نصفه شتاء ونصفه صيف - ⏱️ 30 دقيقة",
-  "ارسم زهرة غريبة الشكل - ⏱️ 10 دقائق",
-  "ارسم حيوان بأربع أعين - ⏱️ 10 دقائق",
-  "ارسم ساعة على شكل زهرة - ⏱️ 10 دقائق",
-  "ارسم قطة داخل تلفاز قديم - ⏱️ 10 دقائق",
-  "ارسم مدينة صغيرة فوق سحابة - ⏱️ 15 دقيقة",
-  "ارسم شجرة تحتوي على وجوه - ⏱️ 15 دقيقة",
-  "ارسم يد شفافة - ⏱️ 5 دقيقة",
-  "ارسم قطة تنام فوق كوكب - ⏱️ 10 دقائق",
-  "ارسم غيمة تمطر قلوبًا - ⏱️ 5 دقائق",
-  "ارسم شمس لها وجه - ⏱️ 5 دقائق",
-  "ارسم كوكب على شكل فاكهة - ⏱️ 10 دقائق",
-  "ارسم مدينة معلقة - ⏱️ 30 دقيقة",
-  "ارسم شجرة تنبت منها المصابيح - ⏱️ 15 دقيقة",
-  "ارسم وجهًا باستخدام الأرقام فقط - ⏱️ 10 دقائق",
-  "ارسم زرافة تطل من نافذة - ⏱️ 5 دقائق",
-  "ارسم زهرة تتفتح وفي داخلها عين - ⏱️ 10 دقائق",
-  "ارسم بطة فوق لوح تزلج - ⏱️ 5 دقائق",
-  "ارسم بطريق في الصحراء - ⏱️ 10 دقائق",
-  "ارسم قطار يمر في بحر - ⏱️ 15 دقيقة",
-  "ارسم خريطة لعالم خيالي - ⏱️ 30 دقيقة",
-];
-
-const savedIdeas = JSON.parse(localStorage.getItem('customIdeas') || '[]');
-const customSet = new Set(savedIdeas);
-let allIdeas = [...builtInIdeas, ...savedIdeas];
-const groups = { easy: [], medium: [], hard: [], custom: savedIdeas };
-allIdeas.forEach(txt => {
-  const m = txt.match(/⏱️\s*(\d+)/);
-  const minutes = m ? parseInt(m[1], 10) : 10;
-  if (minutes <= 10) groups.easy.push(txt);
-  else if (minutes <= 20) groups.medium.push(txt);
-  else groups.hard.push(txt);
-});
-const usedByLevel = { easy: new Set(), medium: new Set(), hard: new Set(), random: new Set(), custom: new Set() };
-let prevLevel = null, currentLevel = null;
-let currentSet = [], used, timerInterval, initialDuration, remainingTime, points = 0, currentIdea = '';
-const scoreEl = document.getElementById('score');
-const backBtn = document.getElementById('backBtn');
-const menuEl = document.getElementById('menu');
-const cardEl = document.getElementById('card');
-const startBtn = document.getElementById('startBtn');
-const stopBtn = document.getElementById('stopBtn');
-const resumeBtn = document.getElementById('resumeBtn');
-const pointButtons = document.getElementById('pointButtons');
-const finishEarlyBtn = document.getElementById('finishEarlyBtn');
-const finishLateBtn = document.getElementById('finishLateBtn');
-const failBtn = document.getElementById('failBtn');
-const ideaEl = document.getElementById('idea');
-const timerEl = document.getElementById('timer');
-
-function openDrawingPage() {
-  window.open('https://my-drawing-tool.pages.dev/', '_blank');
-}
-
-function showMenu() {
-  clearInterval(timerInterval);
-  timerEl.innerText = '';
-  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
-  pointButtons.style.display = 'none';
-  menuEl.classList.add('active'); cardEl.classList.remove('active'); backBtn.classList.remove('show');
-}
-
-function init(level) {
-  if (prevLevel !== level) usedByLevel[level].clear(); prevLevel = level;
-  clearInterval(timerInterval); timerEl.innerText = '';
-  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
-  pointButtons.style.display = 'none'; ideaEl.innerText = '';
-  currentLevel = level;
-  currentSet = level === 'random' ? allIdeas : level === 'custom' ? savedIdeas : groups[level];
-  used = usedByLevel[level];
-  if (level === 'custom' && savedIdeas.length === 0) {
-    ideaEl.innerText = 'لا توجد أفكار مضافة.\nيمكنك إضافة أفكار جديدة من الخانة باليسار.';
-    document.querySelector('button.main').style.display = 'none';
-  } else {
-    ideaEl.style.textAlign = 'center';
-    document.querySelector('button.main').style.display = 'inline-block';
+  // تفعيل/إخفاء الشريط الجانبي
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('active');
   }
-  menuEl.classList.remove('active'); cardEl.classList.add('active'); backBtn.classList.add('show');
-}
 
-function generateIdea() {
-  clearInterval(timerInterval); timerEl.innerText = '';
-  startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
-  pointButtons.style.display = 'none'; ideaEl.style.textAlign = 'center';
-  if (used.size === currentSet.length) { ideaEl.innerText = 'تم عرض كل الأفكار!'; return; }
-  let txt; do { txt = currentSet[Math.floor(Math.random()*currentSet.length)]; } while (used.has(txt));
-  used.add(txt);
-  ideaEl.innerText = txt; currentIdea = txt;
-  const m = txt.match(/⏱️\s*(\d+)/);
-  if (m) { initialDuration = parseInt(m[1],10)*60; remainingTime = initialDuration; startBtn.style.display = 'inline-block'; }
-}
+  const builtInIdeas = [
+    "ارسم روبوت يحاول الطبخ لأول مرة - ⏱️ 30 دقيقة",
+    "ارسم فتاة تقرأ كتابًا وسط عاصفة - ⏱️ 30 دقيقة",
+    "ارسم سمكة تطير في السماء وتلبس نظارات - ⏱️ 15 دقيقة",
+    "ارسم شخصية باستخدام أشكال دائرية فقط - ⏱️ 5 دقائق",
+    "ارسم حيوان باستخدام مثلثات فقط - ⏱️ 5 دقائق",
+    "ارسم نص وجه إنسان ونص وجه قطة - ⏱️ 5 دقائق",
+    "ارسم بيت على شكل فطر - ⏱️ 10 دقائق",
+    "ارسم وجه مكوّن من نباتات - ⏱️ 10 دقائق",
+    "ارسم مدينة فوق ظهر تنين - ⏱️ 30 دقيقة",
+    "ارسم روبوت يحاول الرقص - ⏱️ 15 دقيقة",
+    "ارسم قطة ترتدي درع فارس - ⏱️ 15 دقيقة",
+    "ارسم شجرة فيها أبواب ونوافذ - ⏱️ 5 دقائق",
+    "ارسم يد تمسك المجرة - ⏱️ 15 دقيقة",
+    "ارسم شخصية بأسلوب بيكسل - ⏱️ 30 دقيقة",
+    "ارسم شخصية بدون ملامح - ⏱️ 5 دقائق",
+    "ارسم كوب عصير يحتوي على كواكب - ⏱️ 10 دقائق",
+    "ارسم عالم داخل نظارة شمسية - ⏱️ 15 دقيقة",
+    "ارسم فتاة ترتدي فستان من الزهور - ⏱️ 5 دقائق",
+    "ارسم مدينة تحت البحر - ⏱️ 10 دقائق",
+    "ارسم عين ترى الكون - ⏱️ 15 دقيقة",
+    "ارسم حيوان خيالي بدمج ٣ حيوانات - ⏱️ 15 دقيقة",
+    "ارسم نفسك ككرتون - ⏱️ 10 دقائق",
+    "ارسم شخصية من الخلف فقط - ⏱️ 5 دقائق",
+    "ارسم ساندويتش فيه مدينة - ⏱️ 5 دقائق",
+    "ارسم طفل يطير بواسطة بالونات - ⏱️ 5 دقائق",
+    "ارسم ظل يخالف شكل صاحبه - ⏱️ 10 دقائق",
+    "ارسم نافذة تطل على عالم خيالي - ⏱️ 15 دقيقة",
+    "ارسم شخصية مرسومة بخط واحد فقط - ⏱️ 5 دقائق",
+    "ارسم وردة تنمو من كتاب - ⏱️ 5 دقائق",
+    "ارسم عالم داخل قطرة ماء - ⏱️ 10 دقائق",
+    "ارسم قطة تعزف على آلة موسيقية - ⏱️ 15 دقيقة",
+    "ارسم كرسي على شكل مخلوق - ⏱️ 10 دقائق",
+    "ارسم طريق ينتهي في الفضاء - ⏱️ 15 دقيقة",
+    "ارسم كائن شفاف - ⏱️ 10 دقائق",
+    "ارسم طاولة فطور لكن العناصر تتحرك - ⏱️ 30 دقيقة",
+    "ارسم عالم داخل مصباح - ⏱️ 30 دقيقة",
+    "ارسم الساعة وهي تذوب - ⏱️ 15 دقيقة",
+    "ارسم مفتاح قديم – ⏱️ 5 دقائق",
+    "ارسم قلادة – ⏱️ 5 دقائق",
+    "ارسم ريشة طائر – ⏱️ 5 دقائق",
+    "ارسم وردة ذابلة – ⏱️ 5 دقائق",
+    "ارسم قنديل بحر – ⏱️ 10 دقائق",
+    "ارسم لوحة إعلانات في مدينة – ⏱️ 15 دقيقة",
+    "ارسم خريطة كنز – ⏱️ 10 دقائق",
+    "ارسم فتاة تطير فوق مدينة – ⏱️ 15 دقيقة",
+    "ارسم بالونات تطير فوق بحر – ⏱️ 10 دقائق",
+    "ارسم عين تنعكس فيها شجرة – ⏱️ 15 دقيقة",
+    "ارسم وجه مغطى بأوراق الشجر – ⏱️ 15 دقيقة",
+    "ارسم درج يصل إلى السحاب – ⏱️ 15 دقيقة",
+    "ارسم شارع في يوم ممطر – ⏱️ 15 دقيقة",
+    "ارسم سيارة تطير في السماء – ⏱️ 15 دقيقة",
+    "ارسم زرافة ترتدي قبعة ونظارات – ⏱️ 15 دقيقة",
+    "ارسم خيمة على ظهر سلحفاة – ⏱️ 30 دقيقة",
+    "ارسم قطار يسير بين النجوم – ⏱️ 30 دقيقة",
+    "ارسم فتاة تركب على سمكة ضخمة – ⏱️ 30 دقيقة",
+    "ارسم قمر من الجبن – ⏱️ 15 دقيقة",
+    "ارسم مدينة داخل زجاجة – ⏱️ 30 دقيقة",
+    "ارسم بيضة تنكسر و داخلها حديقة – ⏱️ 30 دقيقة",
+    "ارسم طفل يتزلج على قوس قزح – ⏱️ 30 دقيقة",
+    "ارسم سفينة طائرة تمر فوق جبال – ⏱️ 30 دقيقة",
+    "ارسم دراجة تطير بأجنحة – ⏱️ 15 دقيقة",
+    "ارسم كوكب له وجه إنساني – ⏱️ 30 دقيقة",
+    "ارسم ليمونة فيها بحر – ⏱️ 15 دقيقة",
+    "ارسم قبعة تطير – ⏱️ 10 دقائق",
+    "ارسم شجرة على شكل إنسان – ⏱️ 15 دقيقة",
+    "ارسم بيضة ديناصور على وشك الفقس – ⏱️ 10 دقائق",
+    "ارسم قارب ورقي في بحر – ⏱️ 10 دقائق",
+    "ارسم كوب شاي فيه سماء وغيوم – ⏱️ 15 دقيقة",
+    "ارسم حاسبة فيها قطة – ⏱️ 5 دقائق",
+    "ارسم قلب فيه مدينة – ⏱️ 30 دقيقة",
+    "ارسم كوب قهوة على شكل جبل – ⏱️ 15 دقيقة",
+    "ارسم نص وجه إنسان ونص وجه روبوت - ⏱️ 15 دقيقة",
+    "ارسم ديناصور يركب دراجة - ⏱️ 15 دقيقة",
+    "ارسم فضاء بدون استخدام لون أسود - ⏱️ 10 دقائق",
+    "ارسم طفل يركب على سحابة - ⏱️ 15 دقيقة",
+    "ارسم مدينة فوق سلحفاة عملاقة - ⏱️ 30 دقيقة",
+    "ارسم سحلية على شكل ناطحة سحاب - ⏱️ 30 دقيقة",
+    "ارسم ساعة بدون أرقام - ⏱️ 5 دقائق",
+    "ارسم مشاعرك الحالية ككائن - ⏱️ 15 دقيقة",
+    "ارسم باب مفتوح على عالم آخر - ⏱️ 15 دقيقة",
+    "ارسم شيء غير حي كأنه حي - ⏱️ 10 دقائق",
+    "ارسم حيوان بعين واحدة كبيرة جدًا - ⏱️ 5 دقائق",
+    "ارسم بحر مقلوب - ⏱️ 10 دقائق",
+    "ارسم أسد نائم وسط زهور - ⏱️ 30 دقيقة",
+    "ارسم حقيبة مليئة بالكواكب - ⏱️ 30 دقيقة",
+    "ارسم غيمة على هيئة قطة - ⏱️ 5 دقائق",
+    "ارسم بيت من الورق - ⏱️ 5 دقائق",
+    "ارسم زهرة داخل مصباح - ⏱️ 10 دقائق",
+    "ارسم إنسان نصفه شتاء ونصفه صيف - ⏱️ 30 دقيقة",
+    "ارسم زهرة غريبة الشكل - ⏱️ 10 دقائق",
+    "ارسم حيوان بأربع أعين - ⏱️ 10 دقائق",
+    "ارسم ساعة على شكل زهرة - ⏱️ 10 دقائق",
+    "ارسم قطة داخل تلفاز قديم - ⏱️ 10 دقائق",
+    "ارسم مدينة صغيرة فوق سحابة - ⏱️ 15 دقيقة",
+    "ارسم شجرة تحتوي على وجوه - ⏱️ 15 دقيقة",
+    "ارسم يد شفافة - ⏱️ 5 دقيقة",
+    "ارسم قطة تنام فوق كوكب - ⏱️ 10 دقائق",
+    "ارسم غيمة تمطر قلوبًا - ⏱️ 5 دقائق",
+    "ارسم شمس لها وجه - ⏱️ 5 دقائق",
+    "ارسم كوكب على شكل فاكهة - ⏱️ 10 دقائق",
+    "ارسم مدينة معلقة - ⏱️ 30 دقيقة",
+    "ارسم شجرة تنبت منها المصابيح - ⏱️ 15 دقيقة",
+    "ارسم وجهًا باستخدام الأرقام فقط - ⏱️ 10 دقائق",
+    "ارسم زرافة تطل من نافذة - ⏱️ 5 دقائق",
+    "ارسم زهرة تتفتح وفي داخلها عين - ⏱️ 10 دقائق",
+    "ارسم بطة فوق لوح تزلج - ⏱️ 5 دقائق",
+    "ارسم بطريق في الصحراء - ⏱️ 10 دقائق",
+    "ارسم قطار يمر في بحر - ⏱️ 15 دقيقة",
+    "ارسم خريطة لعالم خيالي - ⏱️ 30 دقيقة",
+  ];
 
-function calculatePrimary() { return customSet.has(currentIdea)?10: initialDuration===300?10: initialDuration===600?20: initialDuration===900?30: initialDuration===1800?50:0; }
-function calculateLate() { return calculatePrimary()/2; }
+  const savedIdeas = JSON.parse(localStorage.getItem('customIdeas') || '[]');
+  const customSet = new Set(savedIdeas);
+  let allIdeas = [...builtInIdeas, ...savedIdeas];
+  const groups = { easy: [], medium: [], hard: [], custom: savedIdeas };
+  allIdeas.forEach(txt => {
+    const m = txt.match(/⏱️\s*(\d+)/);
+    const minutes = m ? parseInt(m[1], 10) : 10;
+    if (minutes <= 10) groups.easy.push(txt);
+    else if (minutes <= 20) groups.medium.push(txt);
+    else groups.hard.push(txt);
+  });
+  const usedByLevel = { easy: new Set(), medium: new Set(), hard: new Set(), random: new Set(), custom: new Set() };
+  let prevLevel = null, currentLevel = null;
+  let currentSet = [], used, timerInterval, initialDuration, remainingTime, points = 0, currentIdea = '';
+  const scoreEl = document.getElementById('score');
+  const backBtn = document.getElementById('backBtn');
+  const menuEl = document.getElementById('menu');
+  const cardEl = document.getElementById('card');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const resumeBtn = document.getElementById('resumeBtn');
+  const pointButtons = document.getElementById('pointButtons');
+  const finishEarlyBtn = document.getElementById('finishEarlyBtn');
+  const finishLateBtn = document.getElementById('finishLateBtn');
+  const failBtn = document.getElementById('failBtn');
+  const ideaEl = document.getElementById('idea');
+  const timerEl = document.getElementById('timer');
 
-function updateTimer() { const m=Math.floor(remainingTime/60), s=remainingTime%60; timerEl.innerText = `⏱️ الوقت المتبقي: ${m}:${s<10?'0':''}${s}`; }
-function startTimer() {
-  startBtn.style.display='none'; stopBtn.style.display='inline-block'; resumeBtn.style.display='none'; pointButtons.style.display='flex';
-  document.getElementById('startDrawingBtn').style.display = 'inline-block';
-  finishEarlyBtn.style.display='inline-block'; finishLateBtn.style.display=failBtn.style.display='none';
-  finishEarlyBtn.textContent = `انتهيت +${calculatePrimary()}`; updateTimer();
-  timerInterval = setInterval(() => {
-    remainingTime--;
-    if (remainingTime<=0) {
-      clearInterval(timerInterval);
-      timerEl.innerText='⏱️ انتهى الوقت!';
-      stopBtn.style.display=resumeBtn.style.display='none';
-      finishEarlyBtn.style.display='none';
-      finishLateBtn.style.display=failBtn.style.display='inline-block';
-      finishLateBtn.textContent=`انتهيت +${calculateLate()}`;
-      playAlarmRepeatedly(4);
-    } else updateTimer();
-  },1000);
-}
-function stopTimer() { clearInterval(timerInterval); timerEl.innerText='⏱️ تم إيقاف المؤقت.'; stopBtn.style.display='none'; resumeBtn.style.display='inline-block'; }
-function resumeTimer() { resumeBtn.style.display='none'; startTimer(); }
+  function openDrawingPage() {
+    window.open('https://my-drawing-tool.pages.dev/', '_blank');
+  }
 
-finishEarlyBtn.onclick = () => {
-  clearInterval(timerInterval);
-  points += calculatePrimary();
-  scoreEl.textContent = `النقاط: ${points}`;
-  generateIdea();
-  document.getElementById('startDrawingBtn').style.display = 'none';
-};
-finishLateBtn.onclick = () => {
-  clearInterval(timerInterval);
-  points += calculateLate();
-  scoreEl.textContent = `النقاط: ${points}`;
-  generateIdea();
-  document.getElementById('startDrawingBtn').style.display = 'none';
-};
-failBtn.onclick = () => {
-  clearInterval(timerInterval);
-  scoreEl.textContent = `النقاط: ${points}`;
-  generateIdea();
-  document.getElementById('startDrawingBtn').style.display = 'none';
-};
+  function showMenu() {
+    clearInterval(timerInterval);
+    timerEl.innerText = '';
+    startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
+    pointButtons.style.display = 'none';
+    menuEl.classList.add('active'); cardEl.classList.remove('active'); backBtn.classList.remove('show');
+  }
 
-function addIdea() {
-  const txt = document.getElementById('newIdea').value.trim(); if (!txt) return;
-  const formatted = `${txt} - ⏱️ 10 دقائق`;
-  allIdeas.push(formatted); savedIdeas.push(formatted); customSet.add(formatted);
-  localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
-  document.getElementById('newIdea').value = '';
-  alert('تمت إضافة فكرتك!');
-}
+  function init(level) {
+    if (prevLevel !== level) usedByLevel[level].clear(); prevLevel = level;
+    clearInterval(timerInterval); timerEl.innerText = '';
+    startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
+    pointButtons.style.display = 'none'; ideaEl.innerText = '';
+    currentLevel = level;
+    currentSet = level === 'random' ? allIdeas : level === 'custom' ? savedIdeas : groups[level];
+    used = usedByLevel[level];
+    if (level === 'custom' && savedIdeas.length === 0) {
+      ideaEl.innerText = 'لا توجد أفكار مضافة.\nيمكنك إضافة أفكار جديدة من الخانة باليسار.';
+      document.querySelector('button.main').style.display = 'none';
+    } else {
+      ideaEl.style.textAlign = 'center';
+      document.querySelector('button.main').style.display = 'inline-block';
+    }
+    menuEl.classList.remove('active'); cardEl.classList.add('active'); backBtn.classList.add('show');
+  }
 
-function removeIdea() {
-  const txt = document.getElementById('newIdea').value.trim(); if (!txt) return alert('اكتب الفكرة لحذفها.');
-  const formatted = `${txt} - ⏱️ 10 دقائق`;
-  const idx = savedIdeas.indexOf(formatted); if (idx === -1) return alert('هذه الفكرة غير موجودة.');
-  savedIdeas.splice(idx, 1); allIdeas = allIdeas.filter(i=>i!==formatted); customSet.delete(formatted);
-  localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
-  document.getElementById('newIdea').value = '';
-  alert('تم حذف الفكرة!');
-}
+  function generateIdea() {
+    clearInterval(timerInterval); timerEl.innerText = '';
+    startBtn.style.display = stopBtn.style.display = resumeBtn.style.display = 'none';
+    pointButtons.style.display = 'none'; ideaEl.style.textAlign = 'center';
+    if (used.size === currentSet.length) { ideaEl.innerText = 'تم عرض كل الأفكار!'; return; }
+    let txt; do { txt = currentSet[Math.floor(Math.random()*currentSet.length)]; } while (used.has(txt));
+    used.add(txt);
+    ideaEl.innerText = txt; currentIdea = txt;
+    const m = txt.match(/⏱️\s*(\d+)/);
+    if (m) { initialDuration = parseInt(m[1],10)*60; remainingTime = initialDuration; startBtn.style.display = 'inline-block'; }
+  }
 
-function playAlarmRepeatedly(times) {
-  const alarm = document.getElementById('alarmSound'); let count = 0;
-  const play = () => { if (count < times) { alarm.currentTime = 0; alarm.play(); count++; setTimeout(play, 1000); }};
-  play();
-}
+  function calculatePrimary() { return customSet.has(currentIdea)?10: initialDuration===300?10: initialDuration===600?20: initialDuration===900?30: initialDuration===1800?50:0; }
+  function calculateLate() { return calculatePrimary()/2; }
 
-// === معرض جانبي مع 5 صور مثال باسم ChatGPT ===
-const galleryItems = [
-  { url: 'https://i.imgur.com/8iXsHio.jpeg', name: 'ChatGPT' },
-  { url: 'https://i.imgur.com/XAvFHFZ.jpeg', name: 'ChatGPT' },
-  { url: 'https://i.imgur.com/6qg3Q95.jpeg', name: 'ChatGPT' },
-  { url: 'https://i.imgur.com/yVKBqwQ.jpeg', name: 'ChatGPT' },
-  { url: 'https://i.imgur.com/Bi3YA7p.jpeg', name: 'ChatGPT' },
-];
+  function updateTimer() { const m=Math.floor(remainingTime/60), s=remainingTime%60; timerEl.innerText = `⏱️ الوقت المتبقي: ${m}:${s<10?'0':''}${s}`; }
+  function startTimer() {
+    startBtn.style.display='none'; stopBtn.style.display='inline-block'; resumeBtn.style.display='none'; pointButtons.style.display='flex';
+    document.getElementById('startDrawingBtn').style.display = 'inline-block';
+    finishEarlyBtn.style.display='inline-block'; finishLateBtn.style.display=failBtn.style.display='none';
+    finishEarlyBtn.textContent = `انتهيت +${calculatePrimary()}`; updateTimer();
+    timerInterval = setInterval(() => {
+      remainingTime--;
+      if (remainingTime<=0) {
+        clearInterval(timerInterval);
+        timerEl.innerText='⏱️ انتهى الوقت!';
+        stopBtn.style.display=resumeBtn.style.display='none';
+        finishEarlyBtn.style.display='none';
+        finishLateBtn.style.display=failBtn.style.display='inline-block';
+        finishLateBtn.textContent=`انتهيت +${calculateLate()}`;
+        playAlarmRepeatedly(4);
+      } else updateTimer();
+    },1000);
+  }
+  function stopTimer() { clearInterval(timerInterval); timerEl.innerText='⏱️ تم إيقاف المؤقت.'; stopBtn.style.display='none'; resumeBtn.style.display='inline-block'; }
+  function resumeTimer() { resumeBtn.style.display='none'; startTimer(); }
 
-function renderGallery() {
+  finishEarlyBtn.onclick = () => {
+    clearInterval(timerInterval);
+    points += calculatePrimary();
+    scoreEl.textContent = `النقاط: ${points}`;
+    generateIdea();
+    document.getElementById('startDrawingBtn').style.display = 'none';
+  };
+  finishLateBtn.onclick = () => {
+    clearInterval(timerInterval);
+    points += calculateLate();
+    scoreEl.textContent = `النقاط: ${points}`;
+    generateIdea();
+    document.getElementById('startDrawingBtn').style.display = 'none';
+  };
+  failBtn.onclick = () => {
+    clearInterval(timerInterval);
+    scoreEl.textContent = `النقاط: ${points}`;
+    generateIdea();
+    document.getElementById('startDrawingBtn').style.display = 'none';
+  };
+
+  function addIdea() {
+    const txt = document.getElementById('newIdea').value.trim(); if (!txt) return;
+    const formatted = `${txt} - ⏱️ 10 دقائق`;
+    allIdeas.push(formatted); savedIdeas.push(formatted); customSet.add(formatted);
+    localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
+    document.getElementById('newIdea').value = '';
+    alert('تمت إضافة فكرتك!');
+  }
+
+  function removeIdea() {
+    const txt = document.getElementById('newIdea').value.trim(); if (!txt) return alert('اكتب الفكرة لحذفها.');
+    const formatted = `${txt} - ⏱️ 10 دقائق`;
+    const idx = savedIdeas.indexOf(formatted); if (idx === -1) return alert('هذه الفكرة غير موجودة.');
+    savedIdeas.splice(idx, 1); allIdeas = allIdeas.filter(i=>i!==formatted); customSet.delete(formatted);
+    localStorage.setItem('customIdeas', JSON.stringify(savedIdeas)); groups.custom = savedIdeas;
+    document.getElementById('newIdea').value = '';
+    alert('تم حذف الفكرة!');
+  }
+
+  function playAlarmRepeatedly(times) {
+    const alarm = document.getElementById('alarmSound'); let count = 0;
+    const play = () => { if (count < times) { alarm.currentTime = 0; alarm.play(); count++; setTimeout(play, 1000); }};
+    play();
+  }
+
+  // === معرض جانبي مع 5 صور مثال باسم ChatGPT ===
+  const galleryItems = [
+    { url: 'https://i.imgur.com/8iXsHio.jpeg', name: 'ChatGPT' },
+    { url: 'https://i.imgur.com/XAvFHFZ.jpeg', name: 'ChatGPT' },
+    { url: 'https://i.imgur.com/6qg3Q95.jpeg', name: 'ChatGPT' },
+    { url: 'https://i.imgur.com/yVKBqwQ.jpeg', name: 'ChatGPT' },
+    { url: 'https://i.imgur.com/Bi3YA7p.jpeg', name: 'ChatGPT' },
+  ];
+
+ function renderGallery() {
   const sidebar = document.getElementById('sidebar');
   sidebar.innerHTML = '';
   galleryItems.forEach(item => {
@@ -396,8 +558,17 @@ function renderGallery() {
     img.alt = item.name;
     img.addEventListener('click', e => {
       e.stopPropagation();
-      document.querySelectorAll('.gallery-item img.enlarged').forEach(i => i.classList.remove('enlarged'));
-      img.classList.add('enlarged');
+      // إنشاء طبقة الـ overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      // استنساخ الصورة ووضعها داخل الـ overlay
+      const enlargedImg = img.cloneNode();
+      overlay.appendChild(enlargedImg);
+      document.body.appendChild(overlay);
+      // منع غلق الـ overlay عند الضغط على الصورة نفسها
+      enlargedImg.addEventListener('click', e => e.stopPropagation());
+      // عند الضغط خارج الصورة (على الـ overlay) نزيلها
+      overlay.addEventListener('click', () => overlay.remove());
     });
     div.appendChild(img);
     const caption = document.createElement('div');
@@ -408,11 +579,12 @@ function renderGallery() {
   });
 }
 
-document.addEventListener('click', () => {
-  document.querySelectorAll('.gallery-item img.enlarged').forEach(i => i.classList.remove('enlarged'));
-});
 
-renderGallery();
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.gallery-item img.enlarged').forEach(i => i.classList.remove('enlarged'));
+  });
+
+  renderGallery();
 </script>
 </body>
 </html>
